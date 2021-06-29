@@ -99,12 +99,23 @@ namespace adless_dns.core
                 }
 
                 string type = "Default";
-                if (question.RecordType == RecordType.A && _hosts.TryGetValue(question.Name.ToString().ToLower(), out string result))
+                if (_hosts.TryGetValue(question.Name.ToString().ToLower(), out string result))
                 {
-                    var record = new ARecord(question.Name, 10, IPAddress.Parse(result));
-                    response.AnswerRecords.Clear();
-                    response.AnswerRecords.Add(record);
-                    type = "Override";
+                    if (question.RecordType == RecordType.A)
+                    {
+                        var record = new ARecord(question.Name, 10, IPAddress.Parse(result));
+                        response.AnswerRecords.Clear();
+                        response.AnswerRecords.Add(record);
+                        type = "Override";
+                    }
+                    else if (question.RecordType == RecordType.Aaaa && result == "0.0.0.0")
+                    {
+                        result = "::/0";
+                        var record = new AaaaRecord(question.Name, 10, IPAddress.Parse(result));
+                        response.AnswerRecords.Clear();
+                        response.AnswerRecords.Add(record);
+                        type = "Override";
+                    }
                 }
                 var answer = response.AnswerRecords.FirstOrDefault();
                 if (answer != null)
