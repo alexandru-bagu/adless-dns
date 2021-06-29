@@ -1,0 +1,1 @@
+# no-ad-dns-server
